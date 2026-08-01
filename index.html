@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="图片.jpg" type="image/jpeg">
+<title>HiMusic</title>
+<style>
+    body {
+        background-color: #008080;
+        font-family: "Microsoft Sans Serif", "Tahoma", "Arial", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: #000;
+        user-select: none;
+    }
+    .window {
+        width: 520px;
+        background-color: #c0c0c0;
+        border-top: 2px solid #ffffff;
+        border-left: 2px solid #ffffff;
+        border-right: 2px solid #404040;
+        border-bottom: 2px solid #404040;
+        box-shadow: 1px 1px 0 0 #000;
+        padding: 2px;
+    }
+    .title-bar {
+        background: linear-gradient(90deg, #000080, #1084d0);
+        color: #fff;
+        padding: 4px 5px;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+    }
+    .content { padding: 15px; }
+    .screen {
+        background-color: #000;
+        font-family: "Courier New", Courier, monospace;
+        padding: 10px;
+        border-top: 2px solid #404040;
+        border-left: 2px solid #404040;
+        border-right: 2px solid #ffffff;
+        border-bottom: 2px solid #ffffff;
+        margin-bottom: 15px;
+        font-size: 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        user-select: text;
+    }
+    #track-info {
+        color: #ffffff;
+        text-shadow: 0 0 3px rgba(255, 255, 255, 0.6);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 8px;
+    }
+    .time-row { display: flex; justify-content: space-between; align-items: center; }
+    #time-info, #system-time {
+        color: #ffffff;
+        text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+        font-size: 14px;
+    }
+    .progress-bar {
+        width: 100%;
+        -webkit-appearance: none;
+        height: 10px;
+        background: #fff;
+        border-top: 2px solid #404040;
+        border-left: 2px solid #404040;
+        border-right: 2px solid #ffffff;
+        border-bottom: 2px solid #ffffff;
+        outline: none;
+        cursor: pointer;
+        margin-bottom: 15px;
+    }
+    .progress-bar::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px; height: 22px;
+        background: #c0c0c0;
+        border-top: 2px solid #ffffff;
+        border-left: 2px solid #ffffff;
+        border-right: 2px solid #404040;
+        border-bottom: 2px solid #404040;
+        cursor: pointer;
+    }
+    .playlist-container {
+        background-color: #fff;
+        border-top: 2px solid #404040;
+        border-left: 2px solid #404040;
+        border-right: 2px solid #ffffff;
+        border-bottom: 2px solid #ffffff;
+        height: 200px;
+        overflow-y: scroll;
+        margin-bottom: 15px;
+        font-size: 14px;
+        user-select: text;
+    }
+    .playlist-container::-webkit-scrollbar { width: 16px; }
+    .playlist-container::-webkit-scrollbar-track { background: #dfdfdf; border-left: 1px solid #404040; }
+    .playlist-container::-webkit-scrollbar-thumb {
+        background: #c0c0c0;
+        border-top: 2px solid #ffffff;
+        border-left: 2px solid #ffffff;
+        border-right: 2px solid #404040;
+        border-bottom: 2px solid #404040;
+    }
+    .playlist-item {
+        padding: 4px 5px;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-bottom: 1px dotted #dfdfdf;
+    }
+    .playlist-item:hover { background-color: #000080; color: #fff; }
+    .playlist-item.active { background-color: #000080; color: #fff; }
+    .controls { display: flex; justify-content: space-between; margin-bottom: 15px; }
+    .btn {
+        background-color: #c0c0c0;
+        border-top: 2px solid #ffffff;
+        border-left: 2px solid #ffffff;
+        border-right: 2px solid #404040;
+        border-bottom: 2px solid #404040;
+        padding: 5px 15px;
+        font-family: inherit;
+        font-size: 14px;
+        cursor: pointer;
+        outline: none;
+    }
+    .btn:active, .btn.pressed {
+        border-top: 2px solid #404040;
+        border-left: 2px solid #404040;
+        border-right: 2px solid #ffffff;
+        border-bottom: 2px solid #ffffff;
+    }
+    button:focus, input[type="range"]:focus, input[type="radio"]:focus {
+        outline: 1px dotted #000;
+        outline-offset: -4px;
+    }
+    .mode-container {
+        display: flex; gap: 15px; align-items: center; font-size: 14px; margin-top: 5px;
+    }
+    input[type="radio"] { margin: 0 5px 0 0; transform: translateY(1px); }
+    .status-bar {
+        background-color: #c0c0c0;
+        border-top: 1px solid #404040;
+        border-left: 1px solid #404040;
+        border-right: 1px solid #ffffff;
+        border-bottom: 1px solid #ffffff;
+        padding: 3px 8px;
+        font-size: 12px;
+        margin: 10px 15px 15px 15px;
+        color: #000;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-family: "Courier New", Courier, monospace;
+        letter-spacing: 0.5px;
+    }
+</style>
+</head>
+<body>
+
+<div class="window">
+    <div class="title-bar"><span>HiMusic</span></div>
+    <div class="content">
+        <div class="screen">
+            <div id="track-info">未加载曲目...</div>
+            <div class="time-row">
+                <div id="time-info">00:00 / 00:00</div>
+                <div id="system-time">YYYY-MM-DD HH:MM:SS</div>
+            </div>
+        </div>
+        <input type="range" class="progress-bar" id="progress" value="0" min="0" max="100">
+        <div class="playlist-container" id="playlist"></div>
+        <div class="controls">
+            <button class="btn" id="prev-btn">|&lt; Prev</button>
+            <button class="btn" id="play-btn">Play &gt;</button>
+            <button class="btn" id="pause-btn">| | Pause</button>
+            <button class="btn" id="stop-btn">[] Stop</button>
+            <button class="btn" id="next-btn">Next &gt;|</button>
+        </div>
+        <div class="mode-container">
+            <label><input type="radio" name="mode" value="list" checked> 列表循环</label>
+            <label><input type="radio" name="mode" value="single"> 单曲循环</label>
+            <label><input type="radio" name="mode" value="shuffle"> 随机播放</label>
+        </div>
+    </div>
+    <div class="status-bar">Across the Great Wall, we can reach every corner in the world.</div>
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+const songs = [
+  // 已修正第一首歌曲的文件名拼写 (240504 -> 20240504)
+  {"name": "240504_El Dorado (Dubstep Remix) - Two Steps From Hell,Thomas Bergersen", "file": "20240504_El Dorado (Dubstep Remix) - Two Steps From Hell,Thomas Bergersen.mp3"},
+  {"name": "20240504_邹姣 - 纸娃娃", "file": "20240504_邹姣 - 纸娃娃.mp3"},
+  {"name": "20240504_闻人听書_ - 虞兮叹", "file": "20240504_闻人听書_ - 虞兮叹.mp3"},
+  {"name": "20240504_陈奕迅 - 相信你的人", "file": "20240504_陈奕迅 - 相信你的人.mp3"},
+  {"name": "20240626_盗墓笔记·十年人间 - 李常超  Lao乾妈 ", "file": "20240626_盗墓笔记·十年人间 - 李常超  Lao乾妈 .mp3"},
+  {"name": "20240626_鸳鸯债 - Uri 喵☆酱", "file": "20240626_鸳鸯债 - Uri 喵☆酱.mp3"},
+  {"name": "20240630_左手指月 (电视剧《香蜜沉沉烬如霜》尾曲)-萨顶顶_320_1704661915", "file": "20240630_左手指月 (电视剧《香蜜沉沉烬如霜》尾曲)-萨顶顶_320_1704661915.mp3"},
+  {"name": "20240630_暮色回响", "file": "20240630_暮色回响.mp3"},
+  {"name": "20240701_五四特别版错位时空 - 共青团中央", "file": "20240701_五四特别版错位时空 - 共青团中央.mp3"},
+  {"name": "20240701_光亮 - 周深", "file": "20240701_光亮 - 周深.mp3"},
+  {"name": "20240701_平凡的一天 - 毛不易", "file": "20240701_平凡的一天 - 毛不易.mp3"},
+  {"name": "Call of silence（钢琴版） - Yi Chou", "file": "Call of silence（钢琴版） - Yi Chou.mp3"},
+  {"name": "CMJ - 久石让-千与千寻（纯音乐）", "file": "CMJ - 久石让-千与千寻（纯音乐）.mp3"},
+  {"name": "eigenTunes亦听 - 罗辑 Logic", "file": "eigenTunes亦听 - 罗辑 Logic.mp3"},
+  {"name": "Fairy Tale - Michael Learns To Rock", "file": "Fairy Tale - Michael Learns To Rock.mp3"},
+  {"name": "Firefly Pure Music", "file": "Firefly Pure Music.mp3"},
+  {"name": "G.E.M. 邓紫棋 - 面壁者", "file": "G.E.M. 邓紫棋 - 面壁者.mp3"},
+  {"name": "index.html", "file": "index.html"},
+  {"name": "Jar Of Love", "file": "Jar Of Love.mp3"},
+  {"name": "kamin", "file": "kamin.mp3"},
+  {"name": "Last Reunion - Peter Roe,Last Reunion在线试听,纯音乐,MP3下载 - 听蛙纯音乐网", "file": "Last Reunion - Peter Roe,Last Reunion在线试听,纯音乐,MP3下载 - 听蛙纯音乐网.mp3"},
+  {"name": "list.txt", "file": "list.txt"},
+  {"name": "Masque_Jupiter - 亡灵序曲（纯钢琴）", "file": "Masque_Jupiter - 亡灵序曲（纯钢琴）.mp3"},
+  {"name": "Mint - 你留下的爱（《独行月球》主题曲）", "file": "Mint - 你留下的爱（《独行月球》主题曲）.mp3"},
+  {"name": "novera", "file": "novera.mp3"},
+  {"name": "Snowdreams-Bandari.320", "file": "Snowdreams-Bandari.320.mp3"},
+  {"name": "Victory - Two Steps From Hell", "file": "Victory - Two Steps From Hell.mp3"},
+  {"name": "一个人的远方", "file": "一个人的远方.mp3"},
+  {"name": "一程山路 毛不易", "file": "一程山路 毛不易.mp3"},
+  {"name": "一荤一素-毛不易.320", "file": "一荤一素-毛不易.320.mp3"},
+  {"name": "不染 - 毛不易", "file": "不染 - 毛不易.mp3"},
+  {"name": "九叔", "file": "九叔.mp3"},
+  {"name": "任同祥 - 百鸟朝凤", "file": "任同祥 - 百鸟朝凤.mp3"},
+  {"name": "会开花的云", "file": "会开花的云.mp3"},
+  {"name": "像我这样的人-毛不易.320(1)-98fc503c76aa", "file": "像我这样的人-毛不易.320(1)-98fc503c76aa.mp3"},
+  {"name": "元素星唱将 - 回家之路", "file": "元素星唱将 - 回家之路.mp3"},
+  {"name": "八千里路云和月", "file": "八千里路云和月.mp3"},
+  {"name": "关山月", "file": "关山月.mp3"},
+  {"name": "冬殇别恋 - 就是南方凯", "file": "冬殇别恋 - 就是南方凯.mp3"},
+  {"name": "凄美地", "file": "凄美地.mp3"},
+  {"name": "别回头", "file": "别回头.mp3"},
+  {"name": "刺客", "file": "刺客.mp3"},
+  {"name": "千金散尽", "file": "千金散尽.mp3"},
+  {"name": "和平之月", "file": "和平之月.mp3"},
+  {"name": "囍（Chinese Wedding） - 葛东琪", "file": "囍（Chinese Wedding） - 葛东琪.mp3"},
+  {"name": "天下劫", "file": "天下劫.mp3"},
+  {"name": "天元", "file": "天元.mp3"},
+  {"name": "如果要写年", "file": "如果要写年.mp3"},
+  {"name": "将进酒", "file": "将进酒.mp3"},
+  {"name": "尘海", "file": "尘海.mp3"},
+  {"name": "山茶花读不懂白玫瑰", "file": "山茶花读不懂白玫瑰.mp3"},
+  {"name": "川子唢呐 - 大鱼（唢呐版）", "file": "川子唢呐 - 大鱼（唢呐版）.mp3"},
+  {"name": "广寒谣", "file": "广寒谣.mp3"},
+  {"name": "弥天", "file": "弥天.mp3"},
+  {"name": "往生咒", "file": "往生咒.mp3"},
+  {"name": "悟空", "file": "悟空.mp3"},
+  {"name": "悬溺 - 葛东琪", "file": "悬溺 - 葛东琪.mp3"},
+  {"name": "折风渡夜", "file": "折风渡夜.mp3"},
+  {"name": "无名的人-毛不易.320", "file": "无名的人-毛不易.320.mp3"},
+  {"name": "春三月-司南.320", "file": "春三月-司南.320.mp3"},
+  {"name": "春涧", "file": "春涧.mp3"},
+  {"name": "晚夜微雨问海棠", "file": "晚夜微雨问海棠.mp3"},
+  {"name": "曲婉婷 - 最好的安排", "file": "曲婉婷 - 最好的安排.mp3"},
+  {"name": "汉风", "file": "汉风.mp3"},
+  {"name": "浑元Rysn - 亡灵序曲（唢呐）", "file": "浑元Rysn - 亡灵序曲（唢呐）.mp3"},
+  {"name": "浮光", "file": "浮光.mp3"},
+  {"name": "消愁-毛不易.320", "file": "消愁-毛不易.320.mp3"},
+  {"name": "潇湘子", "file": "潇湘子.mp3"},
+  {"name": "牧马城市", "file": "牧马城市.mp3"},
+  {"name": "瓢三爷的小喇叭 - 大悲咒-唢呐演奏改编版", "file": "瓢三爷的小喇叭 - 大悲咒-唢呐演奏改编版.mp3"},
+  {"name": "生死相随", "file": "生死相随.mp3"},
+  {"name": "白噪音", "file": "白噪音.mp3"},
+  {"name": "百鬼夜行 (2)", "file": "百鬼夜行 (2).mp3"},
+  {"name": "百鬼夜行", "file": "百鬼夜行.mp3"},
+  {"name": "看得最远的地方", "file": "看得最远的地方.mp3"},
+  {"name": "碧苍战歌", "file": "碧苍战歌.mp3"},
+  {"name": "秋殇别恋(南方凯版) - 就是南方凯", "file": "秋殇别恋(南方凯版) - 就是南方凯.mp3"},
+  {"name": "穿越时空的思念", "file": "穿越时空的思念.mp3"},
+  {"name": "纯音乐 - 美丽的神话", "file": "纯音乐 - 美丽的神话.mp3"},
+  {"name": "耍猴儿唢呐 (百鬼夜行)", "file": "耍猴儿呐 (百鬼夜行).mp3"},
+  {"name": "若思念便思念-周深.320", "file": "若思念便思念-周深.320.mp3"},
+  {"name": "赤伶 - HITA", "file": "赤伶 - HITA.mp3"},
+  {"name": "辞九门回忆", "file": "辞九门回忆.mp3"},
+  {"name": "银河里最像的人", "file": "银河里最像的人.mp3"},
+  {"name": "错位时空-艾辰.320", "file": "错位时空-艾辰.320.mp3"},
+  {"name": "镇海", "file": "镇海.mp3"},
+  {"name": "问情（爱到不能爱聚到终须散）", "file": "问情（爱到不能爱聚到终须散）.mp3"},
+  {"name": "雪见·落入凡尘", "file": "雪见·落入凡尘.mp3"},
+  {"name": "青空 - Candy_Wind,青空在线试听,纯音乐,MP3下载 - 听蛙纯音乐网", "file": "青空 - Candy_Wind,青空在线试听,纯音乐,MP3下载 - 听蛙纯音乐网.mp3"},
+  {"name": "青衣", "file": "青衣.mp3"}
+];
+
+const audio = document.getElementById('audio');
+const playlistEl = document.getElementById('playlist');
+const trackInfo = document.getElementById('track-info');
+const timeInfo = document.getElementById('time-info');
+const systemTime = document.getElementById('system-time');
+const progressBar = document.getElementById('progress');
+const playBtn = document.getElementById('play-btn');
+const pauseBtn = document.getElementById('pause-btn');
+
+let currentIndex = -1;
+let isPlaying = false;
+
+function formatTime(seconds) {
+    if (isNaN(seconds)) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function updateSystemTime() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const h = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    systemTime.textContent = `${y}-${m}-${d} ${h}:${min}:${s}`;
+}
+setInterval(updateSystemTime, 1000);
+updateSystemTime();
+
+function loadSong(index) {
+    if (index < 0 || index >= songs.length) return;
+    const isSameSong = (index === currentIndex);
+    currentIndex = index;
+    const song = songs[index];
+    if (!isSameSong) {
+        audio.src = song.file; 
+    } else {
+        audio.currentTime = 0;
+    }
+    trackInfo.textContent = song.name;
+    timeInfo.textContent = "00:00 / 00:00";
+    document.querySelectorAll('.playlist-item').forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+        if(i === index) el.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    });
+}
+
+function playSong() {
+    if (currentIndex === -1) loadSong(0);
+    audio.play().catch(e => {});
+    isPlaying = true;
+    playBtn.classList.add('pressed');
+    pauseBtn.classList.remove('pressed');
+}
+
+function pauseSong() {
+    audio.pause();
+    isPlaying = false;
+    playBtn.classList.remove('pressed');
+    pauseBtn.classList.add('pressed');
+}
+
+function stopSong() {
+    audio.pause();
+    audio.currentTime = 0;
+    audio.src = "";
+    trackInfo.textContent = "未加载曲目...";
+    timeInfo.textContent = "00:00 / 00:00";
+    isPlaying = false;
+    playBtn.classList.remove('pressed');
+    pauseBtn.classList.remove('pressed');
+    currentIndex = -1;
+    document.querySelectorAll('.playlist-item').forEach(el => el.classList.remove('active'));
+}
+
+function prevSong() {
+    let index = currentIndex - 1;
+    if (index < 0) index = songs.length - 1;
+    loadSong(index);
+    playSong();
+}
+
+function nextSong() {
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    let index = currentIndex + 1;
+    if (mode === 'shuffle') {
+        index = Math.floor(Math.random() * songs.length);
+    } else if (mode === 'single') {
+        index = currentIndex;
+    } else { 
+        if (index >= songs.length) index = 0;
+    }
+    loadSong(index);
+    playSong();
+}
+
+audio.addEventListener('error', () => {
+    if (currentIndex !== -1) {
+        trackInfo.textContent = "无法播放: " + songs[currentIndex].name;
+    }
+});
+
+audio.addEventListener('ended', nextSong);
+
+audio.addEventListener('timeupdate', () => {
+    if (!isNaN(audio.duration)) {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = progress;
+        timeInfo.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+    }
+});
+
+progressBar.addEventListener('input', () => {
+    if (!isNaN(audio.duration)) {
+        const seekTime = (progressBar.value / 100) * audio.duration;
+        audio.currentTime = seekTime;
+    }
+});
+
+playBtn.addEventListener('click', playSong);
+pauseBtn.addEventListener('click', pauseSong);
+document.getElementById('stop-btn').addEventListener('click', stopSong);
+document.getElementById('prev-btn').addEventListener('click', prevSong);
+document.getElementById('next-btn').addEventListener('click', nextSong);
+
+function initPlaylist() {
+    songs.forEach((song, index) => {
+        const item = document.createElement('div');
+        item.className = 'playlist-item';
+        item.textContent = `${index + 1}. ${song.name}`;
+        item.addEventListener('click', () => {
+            loadSong(index);
+            playSong();
+        });
+        playlistEl.appendChild(item);
+    });
+}
+
+initPlaylist();
+</script>
+</body>
+</html>

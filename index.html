@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="图片.jpeg" type="image/jpeg">
+<title>iTunes</title>
+<style>
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100vh; display: flex; background: linear-gradient(160deg, #8fb3e8 0%, #5c88d6 40%, #3a67b8 100%); font-family: "Lucida Grande", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", sans-serif; user-select: none; overflow: hidden; }
+    .window { width: 720px; height: 600px; max-height: calc(100vh - 30px); margin: auto; border-radius: 9px; box-shadow: 0 25px 70px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4); overflow: hidden; display: flex; flex-direction: column; background: #c8c8c8; }
+    .metal { background: repeating-linear-gradient(0deg, rgba(255,255,255,0.09) 0 1px, rgba(0,0,0,0.04) 1px 2px), linear-gradient(to bottom, #e3e3e3, #cfcfcf 55%, #c2c2c2); border-bottom: 1px solid #8f8f8f; padding: 6px 12px 10px 12px; position: relative; flex-shrink: 0; }
+    .lights { position: absolute; top: 8px; left: 10px; display: flex; gap: 7px; }
+    .light { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.35); box-shadow: inset 0 1px 1px rgba(255,255,255,0.7), inset 0 -2px 3px rgba(0,0,0,0.2); }
+    .l-r { background: radial-gradient(circle at 35% 30%, #ffb3ad, #ff5f57 60%, #e0443e); }
+    .l-y { background: radial-gradient(circle at 35% 30%, #ffe8b0, #ffbd2e 60%, #e0a020); }
+    .l-g { background: radial-gradient(circle at 35% 30%, #b6f0a8, #28c840 60%, #1fa832); }
+    .win-title { text-align: center; font-size: 12px; font-weight: bold; color: #222; text-shadow: 0 1px 0 rgba(255,255,255,0.7); padding-top: 2px; }
+    .ctrl-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    .transport { display: flex; align-items: center; gap: 6px; }
+    .t-btn { width: 27px; height: 27px; border-radius: 50%; border: 1px solid #6f6f6f; cursor: pointer; background: radial-gradient(circle at 50% 20%, #ffffff 0%, #e8e8e8 35%, #c6c6c6 70%, #b5b5b5 100%); box-shadow: 0 1px 2px rgba(0,0,0,0.35), inset 0 -3px 5px rgba(0,0,0,0.15); color: #333; font-size: 9px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+    .t-btn:active { background: radial-gradient(circle at 50% 30%, #cfcfcf, #a8a8a8); box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); }
+    #play-btn { width: 32px; height: 32px; font-size: 11px; }
+    .lcd { flex: 1; height: 56px; border-radius: 4px; border: 1px solid #4a4a4a; background: linear-gradient(to bottom, #9dc0ee 0%, #6d9ade 45%, #4a7ccc 55%, #3f6fc0 100%); box-shadow: inset 0 2px 6px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.5); padding: 6px 10px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+    .lcd-top { display: flex; justify-content: space-between; align-items: center; }
+    #track-info { font-size: 13px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lcd-right { display: flex; align-items: center; flex-shrink: 0; margin-left: 8px; gap: 8px; }
+    #play-state { font-size: 10px; opacity: 0.9; }
+    .eq { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+    .eq span { width: 3px; height: 30%; background: #fff; opacity: 0.9; animation: eq 0.9s ease-in-out infinite; animation-play-state: paused; }
+    .eq span:nth-child(1){ animation-delay: 0s; } .eq span:nth-child(2){ animation-delay: .15s; } .eq span:nth-child(3){ animation-delay: .3s; } .eq span:nth-child(4){ animation-delay: .45s; } .eq span:nth-child(5){ animation-delay: .6s; }
+    .lcd.playing .eq span { animation-play-state: running; }
+    @keyframes eq { 0%,100% { height: 20%; } 50% { height: 100%; } }
+    .lcd-bottom { display: flex; align-items: center; gap: 8px; font-size: 10px; font-family: "Courier New", monospace; text-shadow: 0 1px 1px rgba(0,0,0,0.4); }
+    .vol-box { display: flex; align-items: center; gap: 6px; width: 120px; }
+    .vol-label { font-size: 10px; color: #444; }
+    input.aqua { -webkit-appearance: none; appearance: none; height: 8px; border-radius: 5px; background: #fff; border: 1px solid #767676; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); outline: none; cursor: pointer; }
+    #progress { flex: 1; } #volume { width: 90px; }
+    input.aqua::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: radial-gradient(circle at 50% 22%, #eaf5ff 0%, #8cbaf5 40%, #2f6fd8 75%, #1b4fa8 100%); border: 1px solid #1d4c9c; box-shadow: inset 0 -2px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4); }
+    input.aqua::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 50% 22%, #eaf5ff 0%, #8cbaf5 40%, #2f6fd8 75%, #1b4fa8 100%); border: 1px solid #1d4c9c; }
+    .row2 { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
+    .seg { display: flex; }
+    .seg button { font-family: inherit; font-size: 11px; color: #222; padding: 3px 12px; cursor: pointer; margin-left: -1px; border: 1px solid #7f7f7f; background: linear-gradient(to bottom, #fefefe, #e2e2e2 45%, #d0d0d0 50%, #dedede); box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+    .seg button:first-child { border-radius: 11px 0 0 11px; margin-left: 0; }
+    .seg button:last-child { border-radius: 0 11px 11px 0; }
+    .seg button.active { position: relative; z-index: 1; color: #fff; border-color: #2a56a6; background: linear-gradient(to bottom, #84b6f4, #4a8ae4 45%, #2f6fd8 50%, #4a8ae4); text-shadow: 0 -1px 0 rgba(0,0,0,0.35); box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); }
+    .search { position: relative; }
+    .search input { width: 160px; height: 20px; border-radius: 11px; border: 1px solid #7f7f7f; padding: 2px 8px 2px 24px; font-size: 11px; font-family: inherit; background: #fff; box-shadow: inset 0 1px 3px rgba(0,0,0,0.25); outline: none; }
+    .search::before { content: ""; position: absolute; left: 9px; top: 5px; width: 7px; height: 7px; border: 2px solid #888; border-radius: 50%; }
+    .search::after { content: ""; position: absolute; left: 16px; top: 13px; width: 5px; height: 2px; background: #888; transform: rotate(45deg); }
+    .list-area { flex: 1; display: flex; flex-direction: column; min-height: 0; background: #fff; }
+    .list-header { display: flex; font-size: 11px; color: #333; background: linear-gradient(to bottom, #fbfbfb, #e8e8e8 50%, #dcdcdc 51%, #cfcfcf); border-bottom: 1px solid #9a9a9a; text-shadow: 0 1px 0 rgba(255,255,255,0.7); flex-shrink: 0; }
+    .list-header .col { padding: 3px 8px; border-right: 1px solid #c2c2c2; }
+    .playlist { flex: 1; overflow-y: auto; background: #fff; user-select: text; }
+    .playlist::-webkit-scrollbar { width: 11px; }
+    .playlist::-webkit-scrollbar-track { background: #f2f2f2; border-left: 1px solid #ddd; }
+    .playlist::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 6px; border: 2px solid #f2f2f2; }
+    .playlist::-webkit-scrollbar-thumb:hover { background: #a9a9a9; }
+    .row { display: flex; align-items: center; font-size: 12px; color: #000; padding: 2px 0; cursor: default; }
+    .row.stripe { background: #f0f6fd; }
+    .row:hover { background: #e4f0fc; }
+    .row.active { background: linear-gradient(to bottom, #6ba1ea, #3875d7 50%, #2a63c9 51%, #3875d7); color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,0.25); }
+    .c-num { width: 30px; text-align: right; padding-right: 8px; opacity: 0.65; flex-shrink: 0; }
+    .c-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
+    .c-time { width: 56px; text-align: right; padding-right: 10px; opacity: 0.8; flex-shrink: 0; }
+    .status-bar { height: 22px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 11px; color: #444; background: linear-gradient(to bottom, #e6e6e6, #d2d2d2); border-top: 1px solid #9a9a9a; text-shadow: 0 1px 0 rgba(255,255,255,0.6); flex-shrink: 0; gap: 12px; }
+    .status-bar .quote { font-style: italic; color: #666; flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #system-time { font-family: "Courier New", monospace; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="window">
+    <div class="metal">
+        <div class="lights"><div class="light l-r"></div><div class="light l-y"></div><div class="light l-g"></div></div>
+        <div class="win-title">iTunes</div>
+        <div class="ctrl-row">
+            <div class="transport">
+                <button class="t-btn" id="prev-btn" title="上一首 (←)">◀◀</button>
+                <button class="t-btn" id="play-btn" title="播放/暂停 (空格)">▶</button>
+                <button class="t-btn" id="next-btn" title="下一首 (→)">▶▶</button>
+            </div>
+            <div class="lcd" id="lcd">
+                <div class="lcd-top">
+                    <div id="track-info">未加载曲目...</div>
+                    <div class="lcd-right">
+                        <div class="eq"><span></span><span></span><span></span><span></span><span></span></div>
+                        <div id="play-state">已停止</div>
+                    </div>
+                </div>
+                <div class="lcd-bottom">
+                    <span id="time-info">00:00</span>
+                    <input type="range" class="aqua" id="progress" value="0" min="0" max="100">
+                    <span id="total-info">--:--</span>
+                </div>
+            </div>
+            <div class="vol-box">
+                <span class="vol-label">音量</span>
+                <input type="range" class="aqua" id="volume" value="90" min="0" max="100">
+            </div>
+        </div>
+        <div class="row2">
+            <div class="seg">
+                <button data-mode="list" class="active">列表循环</button>
+                <button data-mode="single">单曲循环</button>
+                <button data-mode="shuffle">随机播放</button>
+            </div>
+            <div class="search"><input type="text" id="search" placeholder="搜索音乐"></div>
+        </div>
+    </div>
+    <div class="list-area">
+        <div class="list-header">
+            <div class="col" style="width:30px; text-align:right;">#</div>
+            <div class="col" style="flex:1;">名称</div>
+            <div class="col" style="width:56px; text-align:right; border-right:none;">时间</div>
+        </div>
+        <div class="playlist" id="playlist"></div>
+    </div>
+    <div class="status-bar">
+        <span id="status-info">0 首歌曲</span>
+        <span class="quote">Across the Great Wall, we can reach every corner in the world.</span>
+        <span id="system-time">YYYY/MM/DD HH:MM:SS</span>
+    </div>
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+/* 显示规则：有歌手 = 歌曲名 - 歌手名；无歌手 = 歌曲名。file 为硬盘真实文件名，勿改 */
+const songs = [
+  {"name": "跟太阳系说再见 - 祝乾亮", "file": "跟太阳系说再见 - 祝乾亮.mp3", "d": 374},
+  {"name": "蓄势", "file": "蓄势.mp3", "d": 142},
+  {"name": "流萤之森 - 天逸", "file": "流萤之森 - 天逸.mp3", "d": 139},
+  {"name": "Колыбельная", "file": "Колыбельная.mp3", "d": 234},
+  {"name": "如愿 (钢琴版)", "file": "如愿 - 钢琴版.mp3", "d": 192},
+  {"name": "壁上观", "file": "壁上观.mp3", "d": 101},
+  {"name": "桃花诺", "file": "桃花诺.mp3", "d": 211},
+  {"name": "原点", "file": "原点.mp3", "d": 341},
+  {"name": "日月长明", "file": "日月长明.mp3", "d": 212},
+  {"name": "闹海", "file": "闹海.mp3", "d": 157},
+  {"name": "孤岛", "file": "孤岛.mp3", "d": 300},
+  {"name": "入海", "file": "入海.mp3", "d": 369},
+  {"name": "天涯孤客 - 郑少秋, 珍珍, 佩佩", "file": "郑少秋,珍珍,佩佩+-+天涯孤客.mp3", "d": 275},
+  {"name": "你看你看月亮的脸 - 大头针", "file": "你看你看月亮的脸 - 大头针.mp3", "d": 256},
+  {"name": "乌兰巴托的夜 深情烟嗓版 - 大头针", "file": "乌兰巴托的夜 深情烟嗓版 - 大头针.mp3", "d": 220},
+  {"name": "Windy Hill（3D环绕） - 艾珂AKer", "file": "Windy Hill（3D环绕） - 艾珂AKer.mp3", "d": 303},
+  {"name": "光辉岁月 - Beyond", "file": "Beyond+-+光辉岁月.mp3", "d": 299},
+  {"name": "海阔天空 - Beyond", "file": "BEYOND+-+海阔天空.mp3", "d": 326},
+  {"name": "罗辑·星海横流 - 钟祺源", "file": "钟祺源+-+罗辑·星海横流.mp3", "d": 338},
+  {"name": "土坡上的狗尾巴草 - 卢润泽", "file": "土坡上的狗尾巴草-卢润泽.mp3", "d": 196},
+  {"name": "奉献 - 韩寒", "file": "奉献-韩寒.mp3", "d": 223},
+  {"name": "【3D环绕】《亡灵序曲》 (Cover: Dreamtale) - 音乐黑市", "file": "音乐黑市+-+【3D环绕】《亡灵序曲》+(Cover：Dreamtale).mp3", "d": 246},
+  {"name": "记忆博物馆 (纯音乐版) - HRMT", "file": "HRMT+-+记忆博物馆+(纯音乐版).mp3", "d": 214},
+  {"name": "Pilgrimage", "file": "Pilgrimage.m4a", "d": 245},
+  {"name": "Star Sky (Instrumental Version)", "file": "Star Sky (Instrumental Version) - London Music Works.mp3", "d": 334},
+  {"name": "《夜色钢琴曲》人生的旅途", "file": "20240424_《夜色钢琴曲》人生的旅途.mp3", "d": 251},
+  {"name": "夜曲 - 周杰伦", "file": "周杰伦+-+夜曲.mp3", "d": 227},
+  {"name": "好久不见 - 陈奕迅", "file": "陈奕迅+-+好久不见.mp3", "d": 250},
+  {"name": "富士山下 - 陈奕迅", "file": "陈奕迅+-+富士山下.mp3", "d": 259},
+  {"name": "浮夸 - 陈奕迅", "file": "陈奕迅+-+浮夸.mp3", "d": 284},
+  {"name": "大黑天 - 杨秉音", "file": "杨秉音+-+大黑天.mp3", "d": 205},
+  {"name": "Empire of Angels", "file": "Empire of Angels.mp3", "d": 317},
+  {"name": "春庭雪", "file": "春庭雪.mp3", "d": 241},
+  {"name": "广陵散 - 管平湖", "file": "广陵散 - 管平湖.mp3", "d": 307},
+  {"name": "花开忘忧", "file": "花开忘忧.mp3", "d": 253},
+  {"name": "嘉禾望岗", "file": "嘉禾望岗.mp3", "d": 235},
+  {"name": "精忠报国", "file": "精忠报国.mp3", "d": 214},
+  {"name": "难却", "file": "难却.mp3", "d": 187},
+  {"name": "琵琶行", "file": "琵琶行.mp3", "d": 335},
+  {"name": "沈园外", "file": "沈园外.mp3", "d": 223},
+  {"name": "瞬", "file": "瞬.mp3", "d": 285},
+  {"name": "外婆桥 (旺仔小乔版) - 旺仔小乔", "file": "外婆桥 (旺仔小乔版) - 旺仔小乔.mp3", "d": 242},
+  {"name": "小丑", "file": "小丑.mp3", "d": 246},
+  {"name": "心同此愿", "file": "心同此愿.mp3", "d": 275},
+  {"name": "星月落", "file": "星月落.mp3", "d": 199},
+  {"name": "烟火人间", "file": "烟火人间.mp3", "d": 266},
+  {"name": "长安三万里", "file": "长安三万里.mp3", "d": 142},
+  {"name": "子夜四时歌", "file": "子夜四时歌.mp3", "d": 328},
+  {"name": "醉清波", "file": "醉清波.mp3", "d": 249},
+  {"name": "无人渡口", "file": "无人渡口.mp3", "d": 206},
+  {"name": "牵丝戏", "file": "牵丝戏.mp3", "d": 239},
+  {"name": "探窗 - 国风新语, 浮生梦, 汐音社", "file": "国风新语,浮生梦,汐音社+-+探窗.mp3", "d": 217},
+  {"name": "月亮之上 (交响乐版) - 中国爱乐乐团", "file": "中国爱乐乐团+-+月亮之上(交响乐版).mp3", "d": 211},
+  {"name": "El Dorado (Dubstep Remix) - Two Steps From Hell,Thomas Bergersen", "file": "20240504_El Dorado (Dubstep Remix) - Two Steps From Hell,Thomas Bergersen.mp3", "d": 186},
+  {"name": "纸娃娃 - 邹姣", "file": "20240504_邹姣 - 纸娃娃.mp3", "d": 318},
+  {"name": "虞兮叹 - 闻人听書_", "file": "20240504_闻人听書_ - 虞兮叹.mp3", "d": 210},
+  {"name": "相信你的人 - 陈奕迅", "file": "20240504_陈奕迅 - 相信你的人.mp3", "d": 274},
+  {"name": "盗墓笔记·十年人间 - 李常超 Lao乾妈", "file": "20240626_盗墓笔记·十年人间 - 李常超  Lao乾妈 .mp3", "d": 277},
+  {"name": "鸳鸯债 - Uri 喵☆酱", "file": "20240626_鸳鸯债 - Uri 喵☆酱.mp3", "d": 147},
+  {"name": "左手指月 - 萨顶顶", "file": "20240630_左手指月 (电视剧《香蜜沉沉烬如霜》尾曲)-萨顶顶_320_1704661915.mp3", "d": 230},
+  {"name": "暮色回响", "file": "20240630_暮色回响.mp3", "d": 178},
+  {"name": "五四特别版错位时空 - 共青团中央", "file": "20240701_五四特别版错位时空 - 共青团中央.mp3", "d": 214},
+  {"name": "光亮 - 周深", "file": "20240701_光亮 - 周深.mp3", "d": 289},
+  {"name": "平凡的一天 - 毛不易", "file": "20240701_平凡的一天 - 毛不易.mp3", "d": 277},
+  {"name": "Call of silence（钢琴版） - Yi Chou", "file": "Call of silence（钢琴版） - Yi Chou.mp3", "d": 184},
+  {"name": "久石让-千与千寻 - CMJ", "file": "CMJ - 久石让-千与千寻（纯音乐）.mp3", "d": 110},
+  {"name": "罗辑 Logic - eigenTunes亦听", "file": "eigenTunes亦听 - 罗辑 Logic.mp3", "d": 131},
+  {"name": "Fairy Tale - Michael Learns To Rock", "file": "Fairy Tale - Michael Learns To Rock.mp3", "d": 299},
+  {"name": "Firefly Pure Music", "file": "Firefly Pure Music.mp3", "d": 177},
+  {"name": "面壁者 - G.E.M. 邓紫棋", "file": "G.E.M. 邓紫棋 - 面壁者.mp3", "d": 259},
+  {"name": "Jar Of Love", "file": "Jar Of Love.mp3", "d": 231},
+  {"name": "kamin", "file": "kamin.mp3", "d": 188},
+  {"name": "Last Reunion - Peter Roe", "file": "Last Reunion - Peter Roe,Last Reunion在线试听,纯音乐,MP3下载 - 听蛙纯音乐网.mp3", "d": 273},
+  {"name": "亡灵序曲（纯钢琴） - Masque Jupiter", "file": "Masque_Jupiter - 亡灵序曲（纯钢琴）.mp3", "d": 246},
+  {"name": "你留下的爱 - Mint", "file": "Mint - 你留下的爱（《独行月球》主题曲）.mp3", "d": 249},
+  {"name": "novera", "file": "novera.mp3", "d": 163},
+  {"name": "Snowdreams - Bandari", "file": "Snowdreams-Bandari.320.mp3", "d": 293},
+  {"name": "Victory - Two Steps From Hell", "file": "Victory - Two Steps From Hell.mp3", "d": 320},
+  {"name": "一个人的远方", "file": "一个人的远方.mp3", "d": 239},
+  {"name": "一程山路 - 毛不易", "file": "一程山路 毛不易.mp3", "d": 216},
+  {"name": "一荤一素 - 毛不易", "file": "一荤一素-毛不易.320.mp3", "d": 281},
+  {"name": "不染 - 毛不易", "file": "不染 - 毛不易.mp3", "d": 326},
+  {"name": "九叔", "file": "九叔.mp3", "d": 236},
+  {"name": "百鸟朝凤 - 任同祥", "file": "任同祥 - 百鸟朝凤.mp3", "d": 426},
+  {"name": "会开花的云", "file": "会开花的云.mp3", "d": 211},
+  {"name": "像我这样的人 - 毛不易", "file": "像我这样的人-毛不易.320(1)-98fc503c76aa.mp3", "d": 207},
+  {"name": "回家之路 - 元素星唱将", "file": "元素星唱将 - 回家之路.mp3", "d": 143},
+  {"name": "八千里路云和月", "file": "八千里路云和月.mp3", "d": 235},
+  {"name": "关山月", "file": "关山月.mp3", "d": 216},
+  {"name": "冬殇别恋 - 就是南方凯", "file": "冬殇别恋 - 就是南方凯.mp3", "d": 191},
+  {"name": "凄美地", "file": "凄美地.mp3", "d": 251},
+  {"name": "别回头", "file": "别回头.mp3", "d": 206},
+  {"name": "刺客", "file": "刺客.mp3", "d": 194},
+  {"name": "千金散尽", "file": "千金散尽.mp3", "d": 287},
+  {"name": "和平之月", "file": "和平之月.mp3", "d": 61},
+  {"name": "囍（Chinese Wedding） - 葛东琪", "file": "囍（Chinese Wedding） - 葛东琪.mp3", "d": 217},
+  {"name": "天下劫", "file": "天下劫.mp3", "d": 122},
+  {"name": "天元", "file": "天元.mp3", "d": 108},
+  {"name": "如果要写年", "file": "如果要写年.mp3", "d": 251},
+  {"name": "将进酒", "file": "将进酒.mp3", "d": 153},
+  {"name": "尘海", "file": "尘海.mp3", "d": 270},
+  {"name": "山茶花读不懂白玫瑰", "file": "山茶花读不懂白玫瑰.mp3", "d": 199},
+  {"name": "大鱼（唢呐版） - 川子唢呐", "file": "川子唢呐 - 大鱼（唢呐版）.mp3", "d": 314},
+  {"name": "广寒谣", "file": "广寒谣.mp3", "d": 170},
+  {"name": "弥天", "file": "弥天.mp3", "d": 144},
+  {"name": "往生咒", "file": "往生咒.mp3", "d": 68},
+  {"name": "悟空", "file": "悟空.mp3", "d": 442},
+  {"name": "悬溺 - 葛东琪", "file": "悬溺 - 葛东琪.mp3", "d": 197},
+  {"name": "折风渡夜", "file": "折风渡夜.mp3", "d": 277},
+  {"name": "无名的人 - 毛不易", "file": "无名的人-毛不易.320.mp3", "d": 282},
+  {"name": "春三月 - 司南", "file": "春三月-司南.320.mp3", "d": 225},
+  {"name": "春涧", "file": "春涧.mp3", "d": 170},
+  {"name": "晚夜微雨问海棠", "file": "晚夜微雨问海棠.mp3", "d": 240},
+  {"name": "最好的安排 - 曲婉婷", "file": "曲婉婷 - 最好的安排.mp3", "d": 70},
+  {"name": "汉风", "file": "汉风.mp3", "d": 199},
+  {"name": "亡灵序曲（唢呐） - 浑元Rysn", "file": "浑元Rysn - 亡灵序曲（唢呐）.mp3", "d": 124},
+  {"name": "浮光", "file": "浮光.mp3", "d": 258},
+  {"name": "消愁 - 毛不易", "file": "消愁-毛不易.320.mp3", "d": 261},
+  {"name": "潇湘子", "file": "潇湘子.mp3", "d": 239},
+  {"name": "牧马城市", "file": "牧马城市.mp3", "d": 259},
+  {"name": "大悲咒-唢呐演奏改编版 - 瓢三爷的小喇叭", "file": "瓢三爷的小喇叭 - 大悲咒-唢呐演奏改编版.mp3", "d": 140},
+  {"name": "生死相随", "file": "生死相随.mp3", "d": 228},
+  {"name": "白噪音", "file": "白噪音.mp3", "d": 113},
+  {"name": "百鬼夜行 - 音频怪物", "file": "百鬼夜行 (2).mp3", "d": 251},
+  {"name": "百鬼夜行 - 玥夏", "file": "百鬼夜行.mp3", "d": 198},
+  {"name": "看得最远的地方", "file": "看得最远的地方.mp3", "d": 253},
+  {"name": "碧苍战歌", "file": "碧苍战歌.mp3", "d": 120},
+  {"name": "秋殇别恋(南方凯版) - 就是南方凯", "file": "秋殇别恋(南方凯版) - 就是南方凯.mp3", "d": 207},
+  {"name": "穿越时空的思念", "file": "穿越时空的思念.mp3", "d": 147},
+  {"name": "美丽的神话 (纯音乐)", "file": "纯音乐 - 美丽的神话.mp3", "d": 140},
+  {"name": "耍猴儿唢呐 (百鬼夜行)", "file": "耍猴儿唢呐 (百鬼夜行).mp3", "d": 268},
+  {"name": "若思念便思念 - 周深", "file": "若思念便思念-周深.320.mp3", "d": 241},
+  {"name": "赤伶 - HITA", "file": "赤伶 - HITA.mp3", "d": 266},
+  {"name": "辞九门回忆", "file": "辞九门回忆.mp3", "d": 240},
+  {"name": "银河里最像的人", "file": "银河里最像的人.mp3", "d": 217},
+  {"name": "错位时空 - 艾辰", "file": "错位时空-艾辰.320.mp3", "d": 204},
+  {"name": "镇海", "file": "镇海.mp3", "d": 159},
+  {"name": "问情（爱到不能爱聚到终须散）", "file": "问情（爱到不能爱聚到终须散）.mp3", "d": 260},
+  {"name": "雪见·落入凡尘", "file": "雪见·落入凡尘.mp3", "d": 290},
+  {"name": "青空 - Candy Wind", "file": "青空 - Candy_Wind,青空在线试听,纯音乐,MP3下载 - 听蛙纯音乐网.mp3", "d": 201},
+  {"name": "青衣", "file": "青衣.mp3", "d": 263}
+];
+
+const audio = document.getElementById('audio');
+const playlistEl = document.getElementById('playlist');
+const trackInfo = document.getElementById('track-info');
+const playState = document.getElementById('play-state');
+const timeInfo = document.getElementById('time-info');
+const totalInfo = document.getElementById('total-info');
+const systemTime = document.getElementById('system-time');
+const progressBar = document.getElementById('progress');
+const volumeBar = document.getElementById('volume');
+const playBtn = document.getElementById('play-btn');
+const searchEl = document.getElementById('search');
+const statusInfo = document.getElementById('status-info');
+const lcdEl = document.getElementById('lcd');
+
+let currentIndex = -1;
+let isPlaying = false;
+let playMode = 'list';
+let errorStreak = 0;
+const rowEls = [];
+const timeCells = [];
+
+audio.volume = 0.9;
+
+function formatTime(seconds) {
+    if (isNaN(seconds)) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function formatTotal(sec) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.round((sec % 3600) / 60);
+    return h > 0 ? `${h} 小时 ${m} 分钟` : `${m} 分钟`;
+}
+
+function updateSystemTime() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const h = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    systemTime.textContent = `${y}/${m}/${d} ${h}:${min}:${s}`;
+}
+setInterval(updateSystemTime, 1000);
+updateSystemTime();
+
+function applyStripes() {
+    let vis = 0;
+    rowEls.forEach(el => {
+        if (el.style.display === 'none') return;
+        el.classList.toggle('stripe', vis % 2 === 1);
+        vis++;
+    });
+}
+
+function loadSong(index) {
+    if (index < 0 || index >= songs.length) return;
+    const isSameSong = (index === currentIndex);
+    currentIndex = index;
+    const song = songs[index];
+    if (!isSameSong) { audio.src = song.file; } else { audio.currentTime = 0; }
+    trackInfo.textContent = song.name;
+    timeInfo.textContent = "00:00";
+    totalInfo.textContent = song.d ? formatTime(song.d) : "--:--";
+    rowEls.forEach((el, i) => el.classList.toggle('active', i === index));
+    if (rowEls[index]) rowEls[index].scrollIntoView({ block: 'nearest' });
+}
+
+function playSong() {
+    if (currentIndex === -1) loadSong(0);
+    audio.play().catch(e => {});
+    isPlaying = true;
+    playBtn.textContent = "II";
+    playState.textContent = "正在播放";
+    lcdEl.classList.add('playing');
+}
+
+function pauseSong() {
+    audio.pause();
+    isPlaying = false;
+    playBtn.textContent = "▶";
+    playState.textContent = "已暂停";
+    lcdEl.classList.remove('playing');
+}
+
+function togglePlay() { if (isPlaying) pauseSong(); else playSong(); }
+
+function prevSong() {
+    let index = currentIndex - 1;
+    if (index < 0) index = songs.length - 1;
+    loadSong(index); playSong();
+}
+
+function nextSong() {
+    let index = currentIndex + 1;
+    if (playMode === 'shuffle') { index = Math.floor(Math.random() * songs.length); }
+    else if (playMode === 'single') { index = currentIndex; }
+    else { if (index >= songs.length) index = 0; }
+    loadSong(index); playSong();
+}
+
+document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space') {
+        e.preventDefault();
+        if (document.activeElement && document.activeElement.tagName === 'BUTTON') document.activeElement.blur();
+        togglePlay();
+    } else if (e.key === 'ArrowRight') { nextSong(); }
+    else if (e.key === 'ArrowLeft') { prevSong(); }
+});
+
+document.querySelectorAll('.seg button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.seg button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        playMode = btn.dataset.mode;
+    });
+});
+
+searchEl.addEventListener('input', () => {
+    const q = searchEl.value.trim().toLowerCase();
+    rowEls.forEach((el, i) => { el.style.display = songs[i].name.toLowerCase().includes(q) ? 'flex' : 'none'; });
+    applyStripes();
+});
+
+volumeBar.addEventListener('input', () => { audio.volume = volumeBar.value / 100; });
+
+audio.addEventListener('error', () => {
+    if (currentIndex === -1) return;
+    trackInfo.textContent = "无法播放: " + songs[currentIndex].name;
+    playState.textContent = "错误";
+    lcdEl.classList.remove('playing');
+    errorStreak++;
+    if (errorStreak < songs.length) { setTimeout(nextSong, 800); }
+    else { isPlaying = false; playBtn.textContent = "▶"; }
+});
+
+audio.addEventListener('ended', nextSong);
+
+audio.addEventListener('loadedmetadata', () => { errorStreak = 0; });
+
+audio.addEventListener('timeupdate', () => {
+    if (!isNaN(audio.duration)) {
+        progressBar.value = (audio.currentTime / audio.duration) * 100;
+        timeInfo.textContent = formatTime(audio.currentTime);
+    }
+});
+
+progressBar.addEventListener('input', () => {
+    if (!isNaN(audio.duration)) { audio.currentTime = (progressBar.value / 100) * audio.duration; }
+});
+
+document.getElementById('prev-btn').addEventListener('click', prevSong);
+document.getElementById('next-btn').addEventListener('click', nextSong);
+playBtn.addEventListener('click', togglePlay);
+
+function initPlaylist() {
+    let total = 0;
+    songs.forEach((song, index) => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        const num = document.createElement('div'); num.className = 'c-num'; num.textContent = index + 1;
+        const name = document.createElement('div'); name.className = 'c-name'; name.textContent = song.name;
+        const time = document.createElement('div'); time.className = 'c-time'; time.textContent = song.d ? formatTime(song.d) : "--:--";
+        row.appendChild(num); row.appendChild(name); row.appendChild(time);
+        row.addEventListener('click', () => { loadSong(index); playSong(); });
+        rowEls.push(row); timeCells.push(time); playlistEl.appendChild(row);
+        total += (song.d || 0);
+    });
+    applyStripes();
+    statusInfo.textContent = `${songs.length} 首歌曲, ${formatTotal(total)}`;
+}
+
+initPlaylist();
+</script>
+</body>
+</html>

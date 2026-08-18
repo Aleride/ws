@@ -176,7 +176,6 @@
   .label::after{content:'';position:absolute;right:22%;bottom:20%;width:9px;height:9px;background:#b3342e;border-radius:2px;opacity:.8}
   body.night .label{background:radial-gradient(circle,#d4a76a,#b8884a)}
   body.night .label span{color:#2a1a12}
-  /* 唱臂：支点移到唱片右上方，播放时唱针落到碟面 */
   .arm-pivot{position:absolute;right:20%;bottom:225px;width:22px;height:22px;border-radius:50%;
     background:radial-gradient(circle at 35% 30%,#f8f8fa,#9fa0a8);z-index:4;box-shadow:0 3px 6px rgba(0,0,0,.2)}
   .arm{position:absolute;right:calc(20% + 2px);bottom:118px;width:5px;height:118px;border-radius:3px;
@@ -441,7 +440,7 @@ const SONGS=[
 {name:"暮色回响",file:"./20240630_暮色回响.mp3"},
 {name:"五四特别版错位时空 - 共青团中央",file:"./20240701_五四特别版错位时空 - 共青团中央.mp3"},
 {name:"光亮 - 周深",file:"./20240701_光亮 - 周深.mp3"},
-{name:"平凡的一天 - 毛不易",file:"./20240701_平凡的一天 - 毛不易.mp3"},
+{name:"南一道街",file:"./南一道街.mp3"},
 {name:"Call of silence（钢琴版） - Yi Chou",file:"./Call of silence（钢琴版） - Yi Chou.mp3"},
 {name:"久石让-千与千寻（纯音乐） - CMJ",file:"./CMJ - 久石让-千与千寻（纯音乐）.mp3"},
 {name:"罗辑 Logic - eigenTunes亦听",file:"./eigenTunes亦听 - 罗辑 Logic.mp3"},
@@ -482,7 +481,7 @@ const SONGS=[
 {name:"山茶花读不懂白玫瑰",file:"./山茶花读不懂白玫瑰.mp3"},
 {name:"广寒谣",file:"./广寒谣.mp3"},
 {name:"弥天",file:"./弥天.mp3"},
-{name:"往生咒",file:"./往生咒.mp3"},
+{name:"流浪地球主题音乐",file:"./流浪地球主题音乐.mp3"},
 {name:"悟空",file:"./悟空.mp3"},
 {name:"悬溺 - 葛东琪",file:"./悬溺 - 葛东琪.mp3"},
 {name:"折风渡夜",file:"./折风渡夜.mp3"},
@@ -499,7 +498,7 @@ const SONGS=[
 {name:"牧马城市",file:"./牧马城市.mp3"},
 {name:"大悲咒 (唢呐演奏改编版) - 瓢三爷的小喇叭",file:"./瓢三爷的小喇叭 - 大悲咒-唢呐演奏改编版.mp3"},
 {name:"生死相随",file:"./生死相随.mp3"},
-{name:"白噪音",file:"./白噪音.mp3"},
+{name:"ASMR温暖的森林雨声",file:"./白噪音.mp3"},
 {name:"百鬼夜行 - 音频怪物",file:"./百鬼夜行 (2).mp3"},
 {name:"百鬼夜行 - 玥夏",file:"./百鬼夜行.mp3"},
 {name:"看得最远的地方",file:"./看得最远的地方.mp3"},
@@ -588,7 +587,7 @@ audio.addEventListener('error',()=>{
   toast('「'+SONGS[currentIndex].name+'」缺失，已跳过');next();
 });
 
-/* 进度条拖动：指针锁定在进度条上，与音量完全解耦 */
+/* 进度条拖动：指针锁定，与音量解耦 */
 let barDragging=false;
 function seekTo(e){const r=bar.getBoundingClientRect();
   const clientX=(e.touches?e.touches[0].clientX:e.clientX);
@@ -644,9 +643,9 @@ const TERM_C=[5.4055,20.12,3.87,18.73,5.63,20.646,4.81,20.1,5.52,21.04,5.678,21.
 const JIE_BRANCH={0:1,2:2,4:3,6:4,8:5,10:6,12:7,14:8,16:9,18:10,20:11,22:0};
 const SC_RANGE=['23:00–01:00','01:00–03:00','03:00–05:00','05:00–07:00','07:00–09:00','09:00–11:00','11:00–13:00','13:00–15:00','15:00–17:00','17:00–19:00','19:00–21:00','21:00–23:00'];
 
-/* 传统节日（11个） */
+/* 传统节日（12个，含小年） */
 const LUNAR_FEST={'1-1':'春节','1-15':'元宵节','5-5':'端午节',
-'7-7':'七夕节','7-15':'中元节','8-15':'中秋节','9-9':'重阳节','12-8':'腊八节'};
+'7-7':'七夕节','7-15':'中元节','8-15':'中秋节','9-9':'重阳节','12-8':'腊八节','12-24':'小年'};
 function calcFest(y,mo,d,L){
   try{
     if(L&&!L.isLeap){const f=LUNAR_FEST[L.lM+'-'+L.lD];if(f)return f;}
